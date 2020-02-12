@@ -1,5 +1,5 @@
 let nodes = 837;
-let supply = 14306;
+let supply = 7901;
 let c = 20;
 let wallet_count = 907;
 let burnt = 1284;
