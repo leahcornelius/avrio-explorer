@@ -24,7 +24,7 @@ function addBlock(height,sender,txn_count,tfc, recipitents,timestamp) {
     let min = a.getMinutes();
     let sec = a.getSeconds();
     let time = `${date}/${month}/${year} ${hour}:${min}:${sec}`;
-   document.getElementById('blockList').innerHTML = ocument.getElementById('blockList').innerHTML + " <tr> <td>"+height+"</td> <td>"+sender+"</td> <td>"+txn_count+"</td> <td>"+ tfc+" AIO</td> <td>"+recipitents+"</td> <td>"+time+"</td> </tr> ";
+   document.getElementById('blockList').innerHTML = document.getElementById('blockList').innerHTML + " <tr> <td>"+height+"</td> <td>"+sender+"</td> <td>"+txn_count+"</td> <td>"+ tfc+" AIO</td> <td>"+recipitents+"</td> <td>"+time+"</td> </tr> ";
 }
 
 
