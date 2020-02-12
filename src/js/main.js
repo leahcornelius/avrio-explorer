@@ -17,7 +17,7 @@ function addBlock(height,sender,txn_count,tfc, recipitents,timestamp) {
    
     let a = new Date(timestamp * 1000);
     let year = a.getFullYear();
-    let month = months[a.getMonth()];
+    let month = a.getMonth();
     let date = a.getDate();
     let hour = a.getHours();
     let min = a.getMinutes();
