@@ -13,6 +13,7 @@ document.getElementById("wallets").innerHTML=  wallet_count;
 document.getElementById("burnt").innerHTML=  burnt;
 document.getElementById("txns").innerHTML=  transactions;
 */
+document.getElementById('blockList').innerHTML = "<tr> <th>Height</th> <th>Sender</th> <th>Txn Count</th> <th>Total Funds Change</th> <th>Recipitents</th> <th>Timestanp</th> </tr> ";
 function addBlock(height,sender,txn_count,tfc, recipitents,timestamp) {
    
     let a = new Date(timestamp * 1000);
