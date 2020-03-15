@@ -23,7 +23,7 @@ function addBlock(height,sender,txn_count,tfc, recipitents,timestamp) {
     let min = a.getMinutes();
     let sec = a.getSeconds();
     let time = `${date}/${month}/${year} ${hour}:${min}:${sec}`;
-   document.getElementById('blockList').innerHTML = document.getElementById('blockList').innerHTML + "<tr> <td><a href='/src/block?h=" + height +"'>"+height+"</td> </a> <a href='/src/wallets/chain?key=" + sender + "'> <td>"+sender+"</td> </a> <td>"+txn_count+"</td> <td>"+ tfc+" AIO</td> <td>"+recipitents+"</td> <td>"+time+"</td> </tr> ";
+   document.getElementById('blockList').innerHTML = document.getElementById('blockList').innerHTML + "<tr> <td><a href='/src/block.html?h=" + height +"'>"+height+"</a></td> <a href='/src/wallets/chain.html?key=" + sender + "'> <td>"+sender+"</td> </a> <td>"+txn_count+"</td> <td>"+ tfc+" AIO</td> <td>"+recipitents+"</td> <td>"+time+"</td> </tr> ";
 }
 
 // test
