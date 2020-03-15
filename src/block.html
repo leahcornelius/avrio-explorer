@@ -8,6 +8,27 @@
         <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     </head>
     <body>
+        <script>
+            let params = new URLSearchParams(location.search);
+            let hash = params.get('h');
+            if (hash != undefined) {
+                // get this block
+                let res;
+                fetch('http://127.0.0.1:56789/json_rpc/getBlock/${hash}')
+                    .then(response => response.json())
+                    .then(json => res = json);
+                if (res.response != 200) {
+                    console.log(`Getting block with hash: ${hash} gave error: ${res.error}`);
+                } else {
+                    document.getElementById('hash') = hash;
+                    document.getElementById('height') = res.height;
+                    document.getElementById('chain') = res.chain;
+                    document.getElementById('transaction_count') = res.transaction_count;
+                    document.getElementById('total_funds_change') = res.total_funds_change;
+                }
+            }
+            if height
+        </script>
         <nav class="navbar" role="navigation" aria-label="main navigation">
             <div class="navbar-brand">
                 <a class="navbar-item" href="http://avrio.network"> 
@@ -76,10 +97,10 @@
             <div class="container">
             <h1> Block <span id='hash'></h1>
             <br>
-            <h4> <b>Height:</b></h4>
-            <h4> <b>Sender/ Chain</b></h4>
-            <h4> <b>Transaction Count</b></h4>
-            <h4> <b>Total Funds Change</b></h4>
+                <h4> <b>Height:</b> <span id='height'></span></h4>
+            <h4> <b>Sender/ Chain</b> <span id='chain'></span></h4>
+            <h4> <b>Transaction Count</b> <span id='transaction_count'></span></h4>
+            <h4> <b>Total Funds Change</b> <span id='total_funds_change'></span></h4>
             
             <h3><i class="fa fa-exchange" aria-hidden="true"></i> Transactions</h3>
             <div class="table-responsive">
@@ -103,5 +124,5 @@
             </div>
         </section>
     </body>
-    <script src="src/js/main.js"></script>
+    <script src="js/main.js"></script>
 </html> 
