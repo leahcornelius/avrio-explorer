@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+.dag-chart{
+overflow-x: scroll;
+overflow-y: scroll;
+}
+</style>
+</head>
+<body>
+
+<div id="dag-chart" class="dag-chart" style="width: 100px; height: 350px;"></div>
+
+
+<script>
+
+
+class dag_chart {
+constructor(el,data) {
+
+let canvasEl = document.createElement("canvas");
+el.appendChild(canvasEl);
+
+this.el = canvasEl;
+this.data = this.process_data(data);
+
+this.block_colour = "#30C9E8";
+this.line_colour = "#000";
+
+this.block_size = 20;
+this.block_spacingX = 10;
+this.block_spacingY = 5;
+
+}
+process_data(d){
+let chains = [];
+let blocks = {};
+let links = [];
+let smallest_interval = null;
+let smallest_time = null;
+
+d.forEach(function(i){
+if(!chains.includes(i.chain_key)){
+chains.push(i.chain_key);
+}
+
+Object.values(blocks).forEach(function(b){
+if((smallest_interval == null) || (Math.abs(b.time - i.time) < smallest_interval)){
+smallest_interval = Math.abs(b.time - i.time);
+}
+});
+
+if((smallest_time == null) || (i.time < smallest_time)){
+smallest_time = i.time;
+}
+
+blocks[i.hash] = {
+time: i.time,
+chain_key: i.chain_key,
+chain_number: chains.indexOf(i.chain_key)
+};
+
+i.links.forEach(function(l){
+links.push({
+type: l.type,//0 = line, 1 = arrow
+to: l.hash,
+from: i.hash
+});
+})
+
+});
+
+return {
+blocks:blocks,
+links:links,
+smallest_interval:smallest_interval,
+smallest_time:smallest_time
+};
+}
+
+drawArrowhead(from, to, radius) {
+
+let context = this.el.getContext("2d");
+
+var x_center = to.x;
+var y_center = to.y;
+
+var angle;
+var x;
+var y;
+
+context.beginPath();
+
+angle = Math.atan2(to.y - from.y, to.x - from.x)
+x = radius * Math.cos(angle) + x_center;
+y = radius * Math.sin(angle) + y_center;
+
+context.moveTo(x, y);
+
+angle += (1.0/3.0) * (2 * Math.PI)
+x = radius * Math.cos(angle) + x_center;
+y = radius * Math.sin(angle) + y_center;
+
+context.lineTo(x, y);
+
+angle += (1.0/3.0) * (2 * Math.PI)
+x = radius *Math.cos(angle) + x_center;
+y = radius *Math.sin(angle) + y_center;
+
+context.lineTo(x, y);
+
+context.closePath();
+
+context.fillStyle = this.line_colour;
+context.fill();
+}
+render(){
+
+let d = this.data;
+let thist = this;
+let largestY = 0;
+let largestX = 0;
+
+let block_coords = {};
+
+Object.keys(d.blocks).forEach(function(bk){
+let block = d.blocks[bk];
+
+let xPos = thist.block_spacingX+(thist.block_spacingX*block.chain_number)+(thist.block_size*block.chain_number);
+let yPos = (((block.time - d.smallest_time)/d.smallest_interval) * (thist.block_size + (thist.block_spacingY*2))) + thist.block_spacingY;
+
+block_coords[bk] = {
+x: xPos,
+y: yPos
+}
+
+if(xPos > largestX){
+largestX = xPos;
+}
+if(yPos > largestY){
+largestY = yPos;
+}
+
+});
+
+this.el.width = largestX + thist.block_size + thist.block_spacingX;
+this.el.height = largestY + thist.block_size + thist.block_spacingY;
+let yHeight = largestY + thist.block_size + thist.block_spacingY;
+
+this.el.parentElement.scrollTop = this.el.parentElement.scrollHeight;
+
+Object.keys(d.blocks).forEach(function(bk){
+let block = d.blocks[bk];
+
+let xPos = block_coords[bk]['x'];
+let yPos = block_coords[bk]['y'];
+
+let shape = thist.el.getContext("2d");
+shape.beginPath();
+shape.arc(xPos+(thist.block_size/2), yHeight -(yPos+(thist.block_size/2)),thist.block_size/2, 0, 2*Math.PI);
+shape.fillStyle = thist.block_colour;
+shape.fill();
+
+});
+
+
+d.links.forEach(function(l){
+
+let toX = block_coords[l.to]['x'];
+let toY = block_coords[l.to]['y'];
+
+let fromX = block_coords[l.from]['x'];
+let fromY = block_coords[l.from]['y'];
+
+
+fromX += (thist.block_size/2);
+toX += (thist.block_size/2);
+
+if(fromY > toY){
+toY += thist.block_size;
+}
+else{
+fromY += thist.block_size;
+}
+
+
+/*
+
+if(fromX == toX){
+fromX += (thist.block_size/2);
+toX += (thist.block_size/2);
+
+if(fromY > toY){
+toY += thist.block_size;
+}
+else{
+fromY += thist.block_size;
+}
+}
+else if(fromX < toX){
+fromX += thist.block_size;
+toY += (thist.block_size/2);
+fromY += (thist.block_size/2);
+}
+else{
+toX += thist.block_size;
+toY += (thist.block_size/2);
+fromY += (thist.block_size/2);
+}
+*/
+
+if(l.type == 1){
+thist.drawArrowhead({x:fromX,y:yHeight-fromY},{x:toX,y:yHeight-toY}, 4);
+}
+
+let shape = thist.el.getContext("2d");
+shape.beginPath();
+shape.moveTo(fromX, yHeight-fromY);
+shape.lineTo(toX, yHeight-toY);
+shape.stroke();
+
+
+});
+
+
+}
+}
+
+
+data = [
+{
+hash: '6856c5a3a26b5a3f2ead70ca56870769d1fee88f9c457f4360812f2203565824',
+time: 0,
+chain_key: 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb3wiuf723y9ry923hudh2397fgg7g32',
+links: []
+},
+{
+hash: 'a73fcf339640929207281fb8e038884806e2eb0840f2245694dbba1d5cc89e65',
+time: 32,
+chain_key: 'ca978112cda1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb3wiuf723y9ry923hudh2397fgg7g32',
+links: [
+{hash: '6856c5a3a26b5a3f2ead70ca56870769d1fee88f9c457f4360812f2203565824', type: 1}
+]
+},
+{
+hash: 'b2239ae33d9bc5614aeb2e439e5032b1fe77c32f7080d3211c1d03f1b17ffcf6',
+time: 332,
+chain_key: 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb3wiuf723y9ry923hudh2397fgg7g32',
+links: [
+{hash: 'a73fcf339640929207281fb8e038884806e2eb0840f2245694dbba1d5cc89e65', type: 1}
+]
+},
+{
+hash: 'b2239ae33d96c5614aeb2e439e5032b1fe77c32f7080d3211c1d03f1b17ffcf6',
+time: 332,
+chain_key: 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb3wi8f723y9ry923hudh2397fgg7g32',
+links: []
+},
+{
+hash: 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb3wi8f723y9ry923hudh2397fgg7g32',
+time: 340,
+chain_key: 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb3wiuf723y9ry923hudh2397fgg7g32',
+links: [
+{hash: 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb3wi8f723y9ry923hudh2397fgg7g32', type: 1},
+  {hash: 'a73fcf339640929207281fb8e038884806e2eb0840f2245694dbba1d5cc89e65', type: 0}
+]
+}
+];
+
+dag = new dag_chart(document.getElementById('dag-chart'),data);
+dag.render();
+
+
+</script>
+</body>
+</html>
