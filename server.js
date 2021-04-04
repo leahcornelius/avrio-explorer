@@ -18,10 +18,10 @@ client.on('data', function(data) {
 		if (rec.m_type == "block") {
 			var block = JSON.parse(rec.content)
 			if (block.block_type = "Send") {
-				let new_json = `{hash:${block.hash}, time: ${block.header.timestamp}, public_key: ${block.header.public_key}, links: [ {hash: ${block.header.prev_hash}, type: 0 } ] }`
+				let new_json = `{hash:${block.hash}, time: ${block.header.timestamp}, public_key: ${block.header.chain_key}, links: [ {hash: ${block.header.prev_hash}, type: 0 } ] }`
 				console.log(new_json)
 			} else {
-				let new_json = `{hash:${block.hash}, time: ${block.header.timestamp}, public_key: ${block.header.public_key}, links: [ {hash: ${block.header.prev_hash}, type: 0 }, {hash: ${block.send_block}, type: 1 } ] }`
+				let new_json = `{hash:${block.hash}, time: ${block.header.timestamp}, public_key: ${block.header.chain_key}, links: [ {hash: ${block.header.prev_hash}, type: 0 }, {hash: ${block.send_block}, type: 1 } ] }`
 				console.log(new_json)
 			}
 		}
