@@ -13,6 +13,13 @@ client.on('data', function(data) {
 		console.log("Not init, sending *");
 		client.write('*');
 		init = true;
+	} else {
+		var rec = JSON.parse(data)
+		if (rec.m_type == "block") {
+			var block = JSON.parse(rec.content)
+			let new_json = `{hash:${block.hash}, time: ${block.timestamp}, public_key: ${block.public_key}, links: [] }`
+			console.log(new_json)
+		}
 	}
 });
 
