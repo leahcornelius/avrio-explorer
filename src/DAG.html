@@ -229,7 +229,16 @@ shape.stroke();
 }
 }
 
-
+fetch("http://127.0.0.1:1234/dag")
+  .then(function (response) {
+    return response.json();
+  })
+  .then(function (myJson) {
+    console.log(myJson);
+  })
+  .catch(function (error) {
+    console.log("Error: " + error);
+  });
 data = [
 {
 hash: '6856c5a3a26b5a3f2ead70ca56870769d1fee88f9c457f4360812f2203565824',
