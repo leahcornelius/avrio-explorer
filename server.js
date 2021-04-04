@@ -9,10 +9,10 @@ client.connect(17785, '127.0.0.1', function() {
 
 client.on('data', function(data) {
 	console.log('Received: ' + data);
-	if !init {
+	if (!init) {
 		console.log("Not init, sending *");
 		client.write('*');
-		init=true;
+		init = true;
 	}
 });
 
