@@ -6,7 +6,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "mongodb": "^3.6.5"
+    "mongodb": "^3.6.5",
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {},
   "scripts": {

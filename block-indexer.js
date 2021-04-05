@@ -5,14 +5,7 @@ const start = async function () {
 	MongoClient.connect(url, function (err, db) {
 		if (err) throw err;
 		var dbo = db.db("avrioexplorer");
-		let blocks_cursor = dbo.collection("blocks").find().sort({ _id: -1 }).limit(10);
-
-		let async_get = async function (blocks_cursor) {
-			let blocks_array = await blocks_cursor.toArray();
-			console.log(blocks_array);
-		}
-		async_get(blocks_cursor);
-
+		const fetch = require('node-fetch');
 		var net = require('net');
 
 		var client = new net.Socket();
@@ -40,12 +33,31 @@ const start = async function () {
 				res.json(array);
 			})
 		})
+
 		app.get("/block/:hash", (req, res, next) => {
 			let blocks_cursor = dbo.collection("blocks").find({ hash: req.params.hash });
 
 			blocks_cursor.toArray().then(array => {
-				res.json(array[0]);
-			})
+				if (typeof array[0] != 'undefined') {
+					console.log(array[0]);
+					res.json(array[0]);
+				} else {
+					fetch(`http://127.0.0.1:8000/api/v1/blocks/${req.params.hash}`)
+						.then(function (response) {
+							return response.json();
+						})
+						.then(function (myJson) {
+							console.log(myJson);
+							if (myJson['success'] == true) {
+								res.json(myJson['response']['block'])
+							} else {
+								console.log("Failed to get block from node")
+								res.json([])
+							}
+						}
+						)
+				};
+			});
 		})
 
 		client.on('data', function (data) {

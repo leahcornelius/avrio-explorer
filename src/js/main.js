@@ -39,6 +39,9 @@ function do_stuff() {
                         document.getElementById("supply").innerHTML = supply;
 
 
+                    } else if (txn['flag'] == "u" && block['block_type'] == "Recieve") {
+                        supply -= txn['amount'] / 10000;
+                        document.getElementById("supply").innerHTML = supply;
                     }
                     txn_count += 1;
                     funds_change += txn['amount'];
