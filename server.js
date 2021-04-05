@@ -12,7 +12,7 @@ var cors = require('cors')
 app.use(cors())
 var tot_json = `[`
 app.listen(1234, () => {
- console.log("API running on port 1234");
+	console.log("API running on port 1234");
 });
 app.get("/dag", (req, res, next) => {
 	res.json(tot_json + "]");
@@ -27,20 +27,47 @@ client.on('data', function (data) {
 	} else {
 		var rec = JSON.parse(data)
 		if (rec.m_type == "block") {
+
 			var block = JSON.parse(rec.content)
+			console.log(block.block_type)
 			if (block.block_type = "Send") {
-				let new_json = `{hash:${block.hash}, time: ${block.header.timestamp}, public_key: ${block.header.chain_key}, links: [ {hash: ${block.header.prev_hash}, type: 0 } ] },`
-				console.log(new_json)
-				tot_json = tot_json + new_json
+				if (block.header.prev_hash == "00000000000") {
+					let new_json = `{"hash":"${block.hash}", "time": ${block.header.timestamp}, "chain_key": "${block.header.chain_key}", "links": [] }`
+					if (tot_json = '[') {
+						tot_json = tot_json + new_json
+					} else {
+						tot_json = tot_json + "," + new_json
+					}
+				} else {
+					let new_json = `{"hash":"${block.hash}", "time": ${block.header.timestamp}, "chain_key": "${block.header.chain_key}", "links": [ {"hash": "${block.header.prev_hash}", "type": 0 } ] }`
+
+					if (tot_json = '[') {
+						tot_json = tot_json + new_json
+					} else {
+						tot_json = tot_json + "," + new_json
+					}
+				}
 			} else {
-				let new_json = `{hash:${block.hash}, time: ${block.header.timestamp}, public_key: ${block.header.chain_key}, links: [ {hash: ${block.header.prev_hash}, type: 0 }, {hash: ${block.send_block}, type: 1 } ] },`
-				console.log(new_json)
-				tot_json = tot_json + new_json
+				if (block.header.prev_hash == "00000000000") {
+					let new_json = `{"hash":"${block.hash}"", "time": ${block.header.timestamp}, "chain_key": "${block.header.chain_key}", "links": [ {"hash": "${block.send_block}", "type": 1 } ] }`
+
+					if (tot_json = '[') {
+						tot_json = tot_json + new_json
+					} else {
+						tot_json = tot_json + "," + new_json
+					}
+				} else {
+					let new_json = `{"hash":"${block.hash}", "time": ${block.header.timestamp}, "chain_key": "${block.header.chain_key}", "links": [ {"hash": "${block.header.prev_hash}", "type": 0 }, {"hash": "${block.send_block}", "type": 1 } ] }`
+					if (tot_json = '[') {
+						tot_json = tot_json + new_json
+					} else {
+						tot_json = tot_json + "," + new_json
+					}
+				}
 			}
 		} else {
 			console.log(`Recieved non block msg, type=${rec.m_type}`)
 		}
-		console.log(tot_json)
 	}
 });
 

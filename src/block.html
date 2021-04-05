@@ -1,128 +1,221 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Avrio Blockchain Explorer</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="style.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
-        <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-    </head>
-    <body>
-        <script>
-            let params = new URLSearchParams(location.search);
-            let hash = params.get('h');
-            if (hash != undefined) {
-                // get this block
-                let res;
-                fetch('http://127.0.0.1:56789/json_rpc/getBlock/${hash}')
-                    .then(response => response.json())
-                    .then(json => res = json);
-                if (res.response != 200) {
-                    console.log(`Getting block with hash: ${hash} gave error: ${res.error}`);
-                } else {
-                    document.getElementById('hash') = hash;
-                    document.getElementById('height') = res.height;
-                    document.getElementById('chain') = res.chain;
-                    document.getElementById('transaction_count') = res.transaction_count;
-                    document.getElementById('total_funds_change') = res.total_funds_change;
-                }
+
+<head>
+    <title>Avrio Blockchain Explorer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+</head>
+
+<body>
+    <script>
+        const byteSize = str => new Blob([str]).size;
+        function splitString(str) {
+            var middle = Math.ceil(str.length / 2);
+            var s1 = str.slice(0, middle);
+            var s2 = str.slice(middle);
+            return s1;
+        };
+        function addTxn(hash, fee, sender, reciever, amount, txn_type, txn_size) {
+            if (txn_type == "c") {
+                document.getElementById('transactions_rows').innerHTML = document.getElementById('transactions_rows').innerHTML +
+                    "<tr> <td> <a href='/src/transaction.html?hash=" + hash +
+                    "'>" + hash + "</a></td> <td>" + fee +
+                    " AIO</td> <td>" + amount / 10000
+                    + " AIO</td> <td>" +
+                    splitString(sender) +
+                    "</td>  <td>" + splitString(reciever) + "  </td><td> Claim </td> <td>"
+                    + txn_size / 1000 +
+                    " kB</td> </tr> ";
+            } else if (txn_type = "n") {
+                document.getElementById('transactions_rows').innerHTML = document.getElementById('transactions_rows').innerHTML +
+                    "<tr> <td> <a href='/src/transaction.html?hash=" + hash +
+                    "'>" + splitString(hash) + "...</a></td> <td>" + fee +
+                    " AIO</td> <td>" + amount / 10000
+                    + " AIO</td> <td>" +
+                    splitString(sender) +
+                    "...</td>  <td>" + splitString(reciever) + "...</td><td> Normal </td> <td>"
+                    + txn_size / 1000 +
+                    " kB</td> </tr> ";
+            } else if (txn_type = "u") {
+                document.getElementById('transactions_rows').innerHTML = document.getElementById('transactions_rows').innerHTML +
+                    "<tr> <td> <a href='/src/transaction.html?hash=" + hash +
+                    "'>" + splitString(hash) + "...</a></td> <td>" + fee +
+                    " AIO</td> <td>" + amount / 10000
+                    + " AIO</td> <td>" +
+                    splitString(sender) +
+                    "...</td>  <td>" + splitString(reciever) + "...</td><td> Register Username </td> <td>"
+                    + txn_size / 1000 +
+                    " kB</td> </tr> ";
+            } else {
+                document.getElementById('transactions_rows').innerHTML = document.getElementById('transactions_rows').innerHTML +
+                    "<tr> <td> <a href='/src/transaction.html?hash=" + hash +
+                    "'>" + splitString(hash) + "...</a></td> <td>" + fee +
+                    " AIO</td> <td>" + amount / 10000
+                    + " AIO</td> <td>" +
+                    splitString(sender) +
+                    "...</td>  <td>" + splitString(reciever) + "...</td><td> Unknown </td> <td>"
+                    + txn_size / 1000 +
+                    " kB</td> </tr> ";
             }
-            if height
-        </script>
-        <nav class="navbar" role="navigation" aria-label="main navigation">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="http://avrio.network"> 
-                    Avrio
+        }
+        let params = new URLSearchParams(location.search);
+        let hash = params.get('h');
+        if (hash != undefined) {
+            // get this block
+            let res;
+            fetch(`http://127.0.0.1:1234/block/${hash}`)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (myJson) {
+                    console.log(myJson);
+
+                    document.getElementById('hash').innerHTML = myJson['hash'];
+                    document.getElementById('height').innerHTML = myJson['header']['height'];
+                    document.getElementById('chain').innerHTML = myJson['header']['chain_key'];
+                    let a = new Date(myJson['header']['timestamp']);
+                    let year = a.getFullYear();
+                    let month = a.getMonth();
+                    let date = a.getDate();
+                    let hour = a.getHours();
+                    let min = a.getMinutes();
+                    let sec = a.getSeconds();
+                    let time = `${date}/${month}/${year} ${hour}:${min}:${sec}`;
+                    document.getElementById('time').innerHTML = time;
+                    var funds_change = 0;
+                    var transaction_count = 0;
+                    for (var i in myJson['txns']) {
+                        let txn = myJson['txns'][i];
+
+                        funds_change += parseInt(txn['amount']);
+                        transaction_count += 1;
+                        addTxn(txn['hash'], (txn['gas'] * txn['gas_price']) / 10000, txn['sender_key'], txn['receive_key'], txn['amount'], txn['flag'], byteSize(JSON.stringify(txn)))
+                    }
+                    document.getElementById('transaction_count').innerHTML = transaction_count;
+                    document.getElementById('total_funds_change').innerHTML = funds_change / 10000;
+                    document.getElementById('signature').innerHTML = myJson['signature'];
+                    document.getElementById('prev_hash').innerHTML = myJson['header']['prev_hash'];
+                    document.getElementById('block_type').innerHTML = myJson['block_type']
+                    if (myJson['block_type'] != "Send") {
+
+                        document.getElementById('hash_of_send_block').innerHTML = "<h4> <b>Send Block hash: </b> <span id='send_block_hash'></span></h4>"
+                        document.getElementById('send_block_hash').innerHTML = myJson['send_block']
+                    }
+
+                })
+                .catch(function (error) {
+                    console.log("Error: " + error);
+                });
+
+
+        }
+
+    </script>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="http://avrio.network">
+                Avrio
+            </a>
+
+            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+                data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item">
+                    Home
                 </a>
 
-                <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
+                <a class="navbar-item">
+                    About
                 </a>
             </div>
-
-            <div id="navbarBasicExample" class="navbar-menu">
-                <div class="navbar-start">
-                    <a class="navbar-item">
-                        Home
-                    </a>
-
-                    <a class="navbar-item">
-                        About
-                    </a>
-                </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">
-                        Links
-                    </a>
-
-                    <div class="navbar-dropdown">
-                        <a class="navbar-item">
-                            Github
-                        </a>
-                        <a class="navbar-item">
-                            Discord
-                        </a>
-                        <a class="navbar-item">
-                            Twitter
-                        </a>
-                        <a class="navbar-item">
-                            Explorer
-                        </a>
-                        <hr class="navbar-divider">
-                        <a class="navbar-item">
-                            Contact
-                        </a>
-
-                    </div>
-                </div>
+            <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link">
-                    Whitepaper
+                    Links
                 </a>
-                <div class="navbar-item">
-                    <div class="buttons">
-                        <a class="button is-primary">
-                            <strong>Download</strong>
-                        </a>
-                    </div>
+
+                <div class="navbar-dropdown">
+                    <a class="navbar-item">
+                        Github
+                    </a>
+                    <a class="navbar-item">
+                        Discord
+                    </a>
+                    <a class="navbar-item">
+                        Twitter
+                    </a>
+                    <a class="navbar-item">
+                        Explorer
+                    </a>
+                    <hr class="navbar-divider">
+                    <a class="navbar-item">
+                        Contact
+                    </a>
+
                 </div>
-
-
+            </div>
+            <a class="navbar-link">
+                Whitepaper
+            </a>
+            <div class="navbar-item">
+                <div class="buttons">
+                    <a class="button is-primary">
+                        <strong>Download</strong>
+                    </a>
+                </div>
             </div>
 
-        </nav>
 
-        <section class="section">
-            <div class="container">
-            <h1> Block <span id='hash'></h1>
+        </div>
+
+    </nav>
+
+    <section class="section">
+        <div class="container">
+            <h1> Block: <b><span id='hash'></b></h1>
             <br>
-                <h4> <b>Height:</b> <span id='height'></span></h4>
-            <h4> <b>Sender/ Chain</b> <span id='chain'></span></h4>
-            <h4> <b>Transaction Count</b> <span id='transaction_count'></span></h4>
-            <h4> <b>Total Funds Change</b> <span id='total_funds_change'></span></h4>
-            
-            <h3><i class="fa fa-exchange" aria-hidden="true"></i> Transactions</h3>
+            <h4> <b>Height:</b> <span id='height'></span></h4>
+            <h4> <b>Sender/ Chain:</b> 0x<span id='chain'></span></h4>
+            <h4> <b>Previous Hash: </b> <span id='prev_hash'></span></h4>
+            <h4> <b>Type: </b> <span id='block_type'></span></h4>
+            <div id='hash_of_send_block'></div>
+
+            <br>
+            <h4> <b>Transaction Count:</b> <span id='transaction_count'></span></h4>
+            <h4> <b>Total Funds Change:</b> <span id='total_funds_change'></span></h4>
+            <h4> <b>Time:</b> <span id='time'></span></h4>
+            <h4> <b>Signature: </b> <span id='signature'></span></h4>
+
+            <h3><b>Transactions:</b></h3>
             <div class="table-responsive">
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th><i class="fa fa-paw"></i> Hash</th>
-                    <th><i class="fa fa-percent"></i> Fee</th>
-                    <th><i class="fa fa-money"></i> Total Amount</th>
-                    <th><i class="fa fa-user"></i> Sender</th>
-                    <th><i class="fa fa-info"></i> Type</th>
-                    <th><i class="fa tachometer-alt"></i> Status</th>
-                    <th><i class="fa fa-sort-size-up-alt"></i> Size</th>
-                  </tr>
-                </thead>
-                <tbody id="transactions_rows">
-                </tbody>
-              </table>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Hash</th>
+                            <th>Fee</th>
+                            <th>Amount</th>
+                            <th>Sender</th>
+                            <th>Reciever</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions_rows">
+                    </tbody>
+                </table>
             </div>
 
-            </div>
-        </section>
-    </body>
-    <script src="js/main.js"></script>
-</html> 
+        </div>
+    </section>
+</body>
+
+</html>

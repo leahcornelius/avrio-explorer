@@ -12,7 +12,7 @@
 
 <body>
 
-  <div id="dag-chart" class="dag-chart" style="width: 500px; height: 250px;"></div>
+  <div id="dag-chart" class="dag-chart" style="width: 750px; height: 900px;"></div>
 
 
   <script>
@@ -41,7 +41,7 @@
         let links = [];
         let smallest_interval = null;
         let smallest_time = null;
-        
+
 
         d.forEach(function (i) {
           console.log(i.time);
@@ -232,43 +232,28 @@
       }
     }
     data = [
-      {
-        hash: '0',
-        time: 1617540215100,
-        public_key: '8gbbNDr8jshdBe2JUsasSAowRYuUd24KzQ4GA5kLqGq3',
-        links: []
-      },
-      {
-        hash: '1',
-        time: 1617540215199,
-        public_key: '8gbbNDr8jshdBe2JUsasSAowRYuUd24KzQ4GA5kLqGq3',
-        links: [
-          { hash: '0', type: 0 }
-        ]
-      },
-      {
-        hash: '2',
-        time: 1617540715399,
-        public_key: '8gbbNDr8jshdBe2JUsasSAowRYuUd24KzQ4GA5kLqGq3',
-        links: [
-          { hash: '1', type: 1 }
-        ]
-      }
-    ];
-    /*fetch("http://127.0.0.1:1234/dag")
+      { hash: "ETCGyLp4Jxr8D5vv5f48suyZiHtwhZru5TiXgh1E53YX", time: 0, chain_key: "HU6tADPQk2L3fJnN6qi9Gzw4zJVJH5zjZqZjCR4aAS5B", links: [] },
+      { hash: "9Y3LqsgyE3TUDX3BHT8DJmLLx1FfdAPpyfP6gkm4NZSu", time: 1, chain_key: "HU6tADPQk2L3fJnN6qi9Gzw4zJVJH5zjZqZjCR4aAS5B", links: [{ hash: "ETCGyLp4Jxr8D5vv5f48suyZiHtwhZru5TiXgh1E53YX", type: 0 }] },
+      { hash: "8PbngfaJHo3D1KPyvvqdsLz1GYPxx12w4u9yotpjBejW", time: 2, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [] },
+      { hash: "2Ag6oi1UxbkNcP1BtQmc5pmNxPuk9cMqu4MVFPScvpWe", time: 3, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [{ hash: "8PbngfaJHo3D1KPyvvqdsLz1GYPxx12w4u9yotpjBejW", type: 0 }] },
+      { hash: "2ERVpV8RkCU2GEy8N7XfNdqq6VX3Z6E94NEQ9ck9VKzX", time: 4, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [{ hash: "2Ag6oi1UxbkNcP1BtQmc5pmNxPuk9cMqu4MVFPScvpWe", type: 0 }] },
+      { hash: "3aMg8pYHxvsCU3SZwpd4qhG7s9DyTdBNGdm5Tn13zai7", time: 5, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [{ hash: "2ERVpV8RkCU2GEy8N7XfNdqq6VX3Z6E94NEQ9ck9VKzX", type: 0 }] },
+      { hash: "8tnGbG1jQwMmR5vXPzSFhu7Jp9w5vkEDR7pSdjpd9Ywu", time: 7, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [{ hash: "3aMg8pYHxvsCU3SZwpd4qhG7s9DyTdBNGdm5Tn13zai7", type: 0 }] },
+      { hash: "2dZZoEzb52m8N3xXEwAekRJSrFQXjBhAYKJrDqM7NELS", time: 10, chain_key: "HU6tADPQk2L3fJnN6qi9Gzw4zJVJH5zjZqZjCR4aAS5B", links: [{ hash: "9Y3LqsgyE3TUDX3BHT8DJmLLx1FfdAPpyfP6gkm4NZSu", type: 0 }, { hash: "3aMg8pYHxvsCU3SZwpd4qhG7s9DyTdBNGdm5Tn13zai7", type: 1 }] },
+    ]
+    fetch("http://127.0.0.1:1234/dag")
       .then(function (response) {
         return response.json();
       })
       .then(function (myJson) {
         console.log(myJson);
-        // data = myJson;
+        data = myJson;
+        dag = new dag_chart(document.getElementById('dag-chart'), data);
+        dag.render();
       })
       .catch(function (error) {
         console.log("Error: " + error);
-      });*/
-
-    dag = new dag_chart(document.getElementById('dag-chart'), data);
-    dag.render();
+      });
 
 
   </script>
