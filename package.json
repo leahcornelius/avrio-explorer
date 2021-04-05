@@ -6,6 +6,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "gini": "^1.1.7",
+    "hashmap": "^2.4.0",
     "mongodb": "^3.6.5",
     "node-fetch": "^2.6.1"
   },

@@ -20,7 +20,14 @@ function do_stuff() {
         let time = `${date}/${month}/${year} ${hour}:${min}:${sec}`;
         document.getElementById('blockList').innerHTML = document.getElementById('blockList').innerHTML + "<tr> <td><a href='/src/block.html?hash=" + hash + "'>" + height + "</a></td> <a href='/src/wallets/chain.html?key=" + sender + "'> <td>" + sender + "</td> </a> <td>" + txn_count + "</td> <td>" + tfc + " AIO</td> <td>" + recipitents + "</td> <td>" + time + "</td> </tr> ";
     }
-    fetch("http://127.0.0.1:1234/lastten")
+    fetch(CONFIG.getValue('node_ip') + "/chaincount")
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(myJson) {
+            document.getElementById('wallets').innerHTML = myJson['count'];
+        });
+    fetch(CONFIG.getValue('node_ip') + "/lastten")
         .then(function(response) {
             return response.json();
         })

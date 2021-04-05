@@ -2,261 +2,314 @@
 <html>
 
 <head>
-  <style>
-    .dag-chart {
-      overflow-x: scroll;
-      overflow-y: scroll;
-    }
-  </style>
+    <style>
+        .dag-chart {
+            overflow-x: scroll;
+            overflow-y: scroll;
+        }
+    </style>
 </head>
 
 <body>
 
-  <div id="dag-chart" class="dag-chart" style="width: 750px; height: 900px;"></div>
+    <div id="dag-chart" class="dag-chart" style="width: 750px; height: 900px;"></div>
 
 
-  <script>
+    <script>
+        class dag_chart {
+            constructor(el, data) {
 
+                let canvasEl = document.createElement("canvas");
+                el.appendChild(canvasEl);
 
-    class dag_chart {
-      constructor(el, data) {
+                this.el = canvasEl;
+                this.data = this.process_data(data);
 
-        let canvasEl = document.createElement("canvas");
-        el.appendChild(canvasEl);
+                this.block_colour = "#30C9E8";
+                this.line_colour = "#000";
 
-        this.el = canvasEl;
-        this.data = this.process_data(data);
+                this.block_size = 20;
+                this.block_spacingX = 10;
+                this.block_spacingY = 5;
 
-        this.block_colour = "#30C9E8";
-        this.line_colour = "#000";
-
-        this.block_size = 20;
-        this.block_spacingX = 10;
-        this.block_spacingY = 5;
-
-      }
-      process_data(d) {
-        let chains = [];
-        let blocks = {};
-        let links = [];
-        let smallest_interval = null;
-        let smallest_time = null;
-
-
-        d.forEach(function (i) {
-          console.log(i.time);
-          if (!chains.includes(i.chain_key)) {
-            chains.push(i.chain_key);
-          }
-
-          Object.values(blocks).forEach(function (b) {
-            if ((smallest_interval == null) || (Math.abs(b.time - i.time) < smallest_interval)) {
-              smallest_interval = Math.abs(b.time - i.time);
             }
-          });
+            process_data(d) {
+                let chains = [];
+                let blocks = {};
+                let links = [];
+                let smallest_interval = null;
+                let smallest_time = null;
 
-          if ((smallest_time == null) || (i.time < smallest_time)) {
-            smallest_time = i.time;
-          }
 
-          blocks[i.hash] = {
-            time: i.time,
-            chain_key: i.chain_key,
-            chain_number: chains.indexOf(i.chain_key)
-          };
+                d.forEach(function(i) {
+                    console.log(i.time);
+                    if (!chains.includes(i.chain_key)) {
+                        chains.push(i.chain_key);
+                    }
 
-          i.links.forEach(function (l) {
-            links.push({
-              type: l.type,//0 = line, 1 = arrow
-              to: l.hash,
-              from: i.hash
+                    Object.values(blocks).forEach(function(b) {
+                        if ((smallest_interval == null) || (Math.abs(b.time - i.time) < smallest_interval)) {
+                            smallest_interval = Math.abs(b.time - i.time);
+                        }
+                    });
+
+                    if ((smallest_time == null) || (i.time < smallest_time)) {
+                        smallest_time = i.time;
+                    }
+
+                    blocks[i.hash] = {
+                        time: i.time,
+                        chain_key: i.chain_key,
+                        chain_number: chains.indexOf(i.chain_key)
+                    };
+
+                    i.links.forEach(function(l) {
+                        links.push({
+                            type: l.type, //0 = line, 1 = arrow
+                            to: l.hash,
+                            from: i.hash
+                        });
+                    })
+
+                });
+
+                return {
+                    blocks: blocks,
+                    links: links,
+                    smallest_interval: smallest_interval,
+                    smallest_time: smallest_time
+                };
+            }
+
+            drawArrowhead(from, to, radius) {
+
+                let context = this.el.getContext("2d");
+
+                var x_center = to.x;
+                var y_center = to.y;
+
+                var angle;
+                var x;
+                var y;
+
+                context.beginPath();
+
+                angle = Math.atan2(to.y - from.y, to.x - from.x)
+                x = radius * Math.cos(angle) + x_center;
+                y = radius * Math.sin(angle) + y_center;
+
+                context.moveTo(x, y);
+
+                angle += (1.0 / 3.0) * (2 * Math.PI)
+                x = radius * Math.cos(angle) + x_center;
+                y = radius * Math.sin(angle) + y_center;
+
+                context.lineTo(x, y);
+
+                angle += (1.0 / 3.0) * (2 * Math.PI)
+                x = radius * Math.cos(angle) + x_center;
+                y = radius * Math.sin(angle) + y_center;
+
+                context.lineTo(x, y);
+
+                context.closePath();
+
+                context.fillStyle = this.line_colour;
+                context.fill();
+            }
+            render() {
+
+                let d = this.data;
+                let thist = this;
+                let largestY = 0;
+                let largestX = 0;
+
+                let block_coords = {};
+
+                Object.keys(d.blocks).forEach(function(bk) {
+                    let block = d.blocks[bk];
+
+                    let xPos = thist.block_spacingX + (thist.block_spacingX * block.chain_number) + (thist.block_size * block.chain_number);
+                    let yPos = (((block.time - d.smallest_time) / d.smallest_interval) * (thist.block_size + (thist.block_spacingY * 2))) + thist.block_spacingY;
+
+                    block_coords[bk] = {
+                        x: xPos,
+                        y: yPos
+                    }
+
+                    if (xPos > largestX) {
+                        largestX = xPos;
+                    }
+                    if (yPos > largestY) {
+                        largestY = yPos;
+                    }
+
+                });
+
+                this.el.width = largestX + thist.block_size + thist.block_spacingX;
+                this.el.height = largestY + thist.block_size + thist.block_spacingY;
+                let yHeight = largestY + thist.block_size + thist.block_spacingY;
+
+                this.el.parentElement.scrollTop = this.el.parentElement.scrollHeight;
+
+                Object.keys(d.blocks).forEach(function(bk) {
+                    let block = d.blocks[bk];
+
+                    let xPos = block_coords[bk]['x'];
+                    let yPos = block_coords[bk]['y'];
+
+                    let shape = thist.el.getContext("2d");
+                    shape.beginPath();
+                    shape.arc(xPos + (thist.block_size / 2), yHeight - (yPos + (thist.block_size / 2)), thist.block_size / 2, 0, 2 * Math.PI);
+                    shape.fillStyle = thist.block_colour;
+                    shape.fill();
+
+                });
+
+
+                d.links.forEach(function(l) {
+
+                    let toX = block_coords[l.to]['x'];
+                    let toY = block_coords[l.to]['y'];
+
+                    let fromX = block_coords[l.from]['x'];
+                    let fromY = block_coords[l.from]['y'];
+
+
+                    fromX += (thist.block_size / 2);
+                    toX += (thist.block_size / 2);
+
+                    if (fromY > toY) {
+                        toY += thist.block_size;
+                    } else {
+                        fromY += thist.block_size;
+                    }
+
+
+                    /*
+          
+                    if(fromX == toX){
+                    fromX += (thist.block_size/2);
+                    toX += (thist.block_size/2);
+          
+                    if(fromY > toY){
+                    toY += thist.block_size;
+                    }
+                    else{
+                    fromY += thist.block_size;
+                    }
+                    }
+                    else if(fromX < toX){
+                    fromX += thist.block_size;
+                    toY += (thist.block_size/2);
+                    fromY += (thist.block_size/2);
+                    }
+                    else{
+                    toX += thist.block_size;
+                    toY += (thist.block_size/2);
+                    fromY += (thist.block_size/2);
+                    }
+                    */
+
+                    if (l.type == 1) {
+                        //thist.drawArrowhead({x:fromX,y:yHeight-fromY},{x:toX,y:yHeight-toY}, 4);
+                        thist.drawArrowhead({
+                            x: toX,
+                            y: yHeight - toY
+                        }, {
+                            x: fromX,
+                            y: yHeight - fromY
+                        }, 4);
+                    }
+
+                    let shape = thist.el.getContext("2d");
+                    shape.beginPath();
+                    shape.moveTo(fromX, yHeight - fromY);
+                    shape.lineTo(toX, yHeight - toY);
+                    shape.stroke();
+
+
+                });
+
+
+            }
+        }
+        data = [{
+            hash: "ETCGyLp4Jxr8D5vv5f48suyZiHtwhZru5TiXgh1E53YX",
+            time: 0,
+            chain_key: "HU6tADPQk2L3fJnN6qi9Gzw4zJVJH5zjZqZjCR4aAS5B",
+            links: []
+        }, {
+            hash: "9Y3LqsgyE3TUDX3BHT8DJmLLx1FfdAPpyfP6gkm4NZSu",
+            time: 1,
+            chain_key: "HU6tADPQk2L3fJnN6qi9Gzw4zJVJH5zjZqZjCR4aAS5B",
+            links: [{
+                hash: "ETCGyLp4Jxr8D5vv5f48suyZiHtwhZru5TiXgh1E53YX",
+                type: 0
+            }]
+        }, {
+            hash: "8PbngfaJHo3D1KPyvvqdsLz1GYPxx12w4u9yotpjBejW",
+            time: 2,
+            chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ",
+            links: []
+        }, {
+            hash: "2Ag6oi1UxbkNcP1BtQmc5pmNxPuk9cMqu4MVFPScvpWe",
+            time: 3,
+            chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ",
+            links: [{
+                hash: "8PbngfaJHo3D1KPyvvqdsLz1GYPxx12w4u9yotpjBejW",
+                type: 0
+            }]
+        }, {
+            hash: "2ERVpV8RkCU2GEy8N7XfNdqq6VX3Z6E94NEQ9ck9VKzX",
+            time: 4,
+            chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ",
+            links: [{
+                hash: "2Ag6oi1UxbkNcP1BtQmc5pmNxPuk9cMqu4MVFPScvpWe",
+                type: 0
+            }]
+        }, {
+            hash: "3aMg8pYHxvsCU3SZwpd4qhG7s9DyTdBNGdm5Tn13zai7",
+            time: 5,
+            chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ",
+            links: [{
+                hash: "2ERVpV8RkCU2GEy8N7XfNdqq6VX3Z6E94NEQ9ck9VKzX",
+                type: 0
+            }]
+        }, {
+            hash: "8tnGbG1jQwMmR5vXPzSFhu7Jp9w5vkEDR7pSdjpd9Ywu",
+            time: 7,
+            chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ",
+            links: [{
+                hash: "3aMg8pYHxvsCU3SZwpd4qhG7s9DyTdBNGdm5Tn13zai7",
+                type: 0
+            }]
+        }, {
+            hash: "2dZZoEzb52m8N3xXEwAekRJSrFQXjBhAYKJrDqM7NELS",
+            time: 10,
+            chain_key: "HU6tADPQk2L3fJnN6qi9Gzw4zJVJH5zjZqZjCR4aAS5B",
+            links: [{
+                hash: "9Y3LqsgyE3TUDX3BHT8DJmLLx1FfdAPpyfP6gkm4NZSu",
+                type: 0
+            }, {
+                hash: "3aMg8pYHxvsCU3SZwpd4qhG7s9DyTdBNGdm5Tn13zai7",
+                type: 1
+            }]
+        }, ]
+        fetch(CONFIG.getValue('node_ip') + "/dag")
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(myJson) {
+                console.log(myJson);
+                data = myJson;
+                dag = new dag_chart(document.getElementById('dag-chart'), data);
+                dag.render();
+            })
+            .catch(function(error) {
+                console.log("Error: " + error);
             });
-          })
-
-        });
-
-        return {
-          blocks: blocks,
-          links: links,
-          smallest_interval: smallest_interval,
-          smallest_time: smallest_time
-        };
-      }
-
-      drawArrowhead(from, to, radius) {
-
-        let context = this.el.getContext("2d");
-
-        var x_center = to.x;
-        var y_center = to.y;
-
-        var angle;
-        var x;
-        var y;
-
-        context.beginPath();
-
-        angle = Math.atan2(to.y - from.y, to.x - from.x)
-        x = radius * Math.cos(angle) + x_center;
-        y = radius * Math.sin(angle) + y_center;
-
-        context.moveTo(x, y);
-
-        angle += (1.0 / 3.0) * (2 * Math.PI)
-        x = radius * Math.cos(angle) + x_center;
-        y = radius * Math.sin(angle) + y_center;
-
-        context.lineTo(x, y);
-
-        angle += (1.0 / 3.0) * (2 * Math.PI)
-        x = radius * Math.cos(angle) + x_center;
-        y = radius * Math.sin(angle) + y_center;
-
-        context.lineTo(x, y);
-
-        context.closePath();
-
-        context.fillStyle = this.line_colour;
-        context.fill();
-      }
-      render() {
-
-        let d = this.data;
-        let thist = this;
-        let largestY = 0;
-        let largestX = 0;
-
-        let block_coords = {};
-
-        Object.keys(d.blocks).forEach(function (bk) {
-          let block = d.blocks[bk];
-
-          let xPos = thist.block_spacingX + (thist.block_spacingX * block.chain_number) + (thist.block_size * block.chain_number);
-          let yPos = (((block.time - d.smallest_time) / d.smallest_interval) * (thist.block_size + (thist.block_spacingY * 2))) + thist.block_spacingY;
-
-          block_coords[bk] = {
-            x: xPos,
-            y: yPos
-          }
-
-          if (xPos > largestX) {
-            largestX = xPos;
-          }
-          if (yPos > largestY) {
-            largestY = yPos;
-          }
-
-        });
-
-        this.el.width = largestX + thist.block_size + thist.block_spacingX;
-        this.el.height = largestY + thist.block_size + thist.block_spacingY;
-        let yHeight = largestY + thist.block_size + thist.block_spacingY;
-
-        this.el.parentElement.scrollTop = this.el.parentElement.scrollHeight;
-
-        Object.keys(d.blocks).forEach(function (bk) {
-          let block = d.blocks[bk];
-
-          let xPos = block_coords[bk]['x'];
-          let yPos = block_coords[bk]['y'];
-
-          let shape = thist.el.getContext("2d");
-          shape.beginPath();
-          shape.arc(xPos + (thist.block_size / 2), yHeight - (yPos + (thist.block_size / 2)), thist.block_size / 2, 0, 2 * Math.PI);
-          shape.fillStyle = thist.block_colour;
-          shape.fill();
-
-        });
-
-
-        d.links.forEach(function (l) {
-
-          let toX = block_coords[l.to]['x'];
-          let toY = block_coords[l.to]['y'];
-
-          let fromX = block_coords[l.from]['x'];
-          let fromY = block_coords[l.from]['y'];
-
-
-          fromX += (thist.block_size / 2);
-          toX += (thist.block_size / 2);
-
-          if (fromY > toY) {
-            toY += thist.block_size;
-          }
-          else {
-            fromY += thist.block_size;
-          }
-
-
-          /*
-          
-          if(fromX == toX){
-          fromX += (thist.block_size/2);
-          toX += (thist.block_size/2);
-          
-          if(fromY > toY){
-          toY += thist.block_size;
-          }
-          else{
-          fromY += thist.block_size;
-          }
-          }
-          else if(fromX < toX){
-          fromX += thist.block_size;
-          toY += (thist.block_size/2);
-          fromY += (thist.block_size/2);
-          }
-          else{
-          toX += thist.block_size;
-          toY += (thist.block_size/2);
-          fromY += (thist.block_size/2);
-          }
-          */
-
-          if (l.type == 1) {
-            //thist.drawArrowhead({x:fromX,y:yHeight-fromY},{x:toX,y:yHeight-toY}, 4);
-            thist.drawArrowhead({ x: toX, y: yHeight - toY }, { x: fromX, y: yHeight - fromY }, 4);
-          }
-
-          let shape = thist.el.getContext("2d");
-          shape.beginPath();
-          shape.moveTo(fromX, yHeight - fromY);
-          shape.lineTo(toX, yHeight - toY);
-          shape.stroke();
-
-
-        });
-
-
-      }
-    }
-    data = [
-      { hash: "ETCGyLp4Jxr8D5vv5f48suyZiHtwhZru5TiXgh1E53YX", time: 0, chain_key: "HU6tADPQk2L3fJnN6qi9Gzw4zJVJH5zjZqZjCR4aAS5B", links: [] },
-      { hash: "9Y3LqsgyE3TUDX3BHT8DJmLLx1FfdAPpyfP6gkm4NZSu", time: 1, chain_key: "HU6tADPQk2L3fJnN6qi9Gzw4zJVJH5zjZqZjCR4aAS5B", links: [{ hash: "ETCGyLp4Jxr8D5vv5f48suyZiHtwhZru5TiXgh1E53YX", type: 0 }] },
-      { hash: "8PbngfaJHo3D1KPyvvqdsLz1GYPxx12w4u9yotpjBejW", time: 2, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [] },
-      { hash: "2Ag6oi1UxbkNcP1BtQmc5pmNxPuk9cMqu4MVFPScvpWe", time: 3, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [{ hash: "8PbngfaJHo3D1KPyvvqdsLz1GYPxx12w4u9yotpjBejW", type: 0 }] },
-      { hash: "2ERVpV8RkCU2GEy8N7XfNdqq6VX3Z6E94NEQ9ck9VKzX", time: 4, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [{ hash: "2Ag6oi1UxbkNcP1BtQmc5pmNxPuk9cMqu4MVFPScvpWe", type: 0 }] },
-      { hash: "3aMg8pYHxvsCU3SZwpd4qhG7s9DyTdBNGdm5Tn13zai7", time: 5, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [{ hash: "2ERVpV8RkCU2GEy8N7XfNdqq6VX3Z6E94NEQ9ck9VKzX", type: 0 }] },
-      { hash: "8tnGbG1jQwMmR5vXPzSFhu7Jp9w5vkEDR7pSdjpd9Ywu", time: 7, chain_key: "6QZe5H1tLNtnxELCLFu4hy9qQT8L62rbwgaGvBvpUdAZ", links: [{ hash: "3aMg8pYHxvsCU3SZwpd4qhG7s9DyTdBNGdm5Tn13zai7", type: 0 }] },
-      { hash: "2dZZoEzb52m8N3xXEwAekRJSrFQXjBhAYKJrDqM7NELS", time: 10, chain_key: "HU6tADPQk2L3fJnN6qi9Gzw4zJVJH5zjZqZjCR4aAS5B", links: [{ hash: "9Y3LqsgyE3TUDX3BHT8DJmLLx1FfdAPpyfP6gkm4NZSu", type: 0 }, { hash: "3aMg8pYHxvsCU3SZwpd4qhG7s9DyTdBNGdm5Tn13zai7", type: 1 }] },
-    ]
-    fetch("http://127.0.0.1:1234/dag")
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (myJson) {
-        console.log(myJson);
-        data = myJson;
-        dag = new dag_chart(document.getElementById('dag-chart'), data);
-        dag.render();
-      })
-      .catch(function (error) {
-        console.log("Error: " + error);
-      });
-
-
-  </script>
+    </script>
 </body>
 
 </html>
