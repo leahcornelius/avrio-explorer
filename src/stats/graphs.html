@@ -2,10 +2,9 @@
 <html>
 
 <head>
-    <title>Avrio Blockchain Explorer</title>
+    <title>Avrio Blockchain Explorer - Graphs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../style.css">
-
+    <link rel="stylesheet" href="../../../style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
@@ -89,43 +88,24 @@
 
     <section class="section">
         <div class="container">
-            <h1> Block: <b><span id='hash'></b></h1>
-            <br>
-            <h4> <b>Height:</b> <span id='height'></span></h4>
-            <h4> <b>Sender/ Chain:</b> 0x<span id='chain'></span></h4>
-            <h4> <b>Previous Hash: </b> <span id='prev_hash'></span></h4>
-            <h4> <b>Type: </b> <span id='block_type'></span></h4>
-            <div id='hash_of_send_block'></div>
 
-            <br>
-            <h4> <b>Transaction Count:</b> <span id='transaction_count'></span></h4>
-            <h4> <b>Total Funds Change:</b> <span id='total_funds_change'></span></h4>
-            <h4> <b>Time:</b> <span id='time'></span></h4>
-            <h4> <b>Signature: </b> <span id='signature'></span></h4>
+            <br><br>
 
-            <h3><b>Transactions:</b></h3>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Hash</th>
-                            <th>Fee</th>
-                            <th>Amount</th>
-                            <th>Sender</th>
-                            <th>Reciever</th>
-                            <th>Type</th>
-                            <th>Size</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactions_rows">
-                    </tbody>
-                </table>
+            <div class="columns">
+                <div class="column curve-box">
+                    <div class="curve-box-inner">
+                        <table class="table" id="graphsmain">
+
+                        </table>
+                    </div>
+                </div>
             </div>
 
         </div>
     </section>
+    <script src="../js/config.js"></script>
+    <script src="../js/graphs.js"></script>
 </body>
-<script src="js/config.js"></script>
-<script src="js/block.js"></script>
+
 
 </html>
