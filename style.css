@@ -1,20 +1,20 @@
-body{
+body {
     min-height: 100vh;
     background-color: #f5f6f7;
     color: #53565c;
 }
 
-h1.title{
+h1.title {
     color: #53565c;
 }
 
-.column.curve-box{
+.column.curve-box {
     padding-top: 30px;
     padding-bottom: 30px;
     background-color: #fff;
 }
 
-.curve-box-inner{
+.curve-box-inner {
     border-left: 1px solid #ccc;
     padding: 10px;
     padding-left: 40px;
@@ -22,46 +22,50 @@ h1.title{
     text-align: center;
 }
 
-.curve-box-inner p{
+.curve-box-inner p {
     color: #96999e;
     border-bottom: 1px dotted #96999e;
     display: inline;
     padding-bottom: 2px;
 }
 
-.column.curve-box:first-child .curve-box-inner{
+.column.curve-box:first-child .curve-box-inner {
     border-left: 0px;
 }
 
-.column.curve-box:first-child{
+.column.curve-box:first-child {
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
 }
 
-.column.curve-box:last-child{
+.column.curve-box:last-child {
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
 }
 
-.columns.pad-right{
+.columns.pad-right {
     margin-right: 30px;
 }
 
-.table{
+.table {
     width: 100%;
 }
 
-table.table th{
+table.table th {
     color: #96999e;
 }
 
-a{
+a {
     color: #578fff;
     text-decoration: none;
 }
 
-td a:hover{
+td a:hover {
     opacity: 1;
     color: #578fff;
     text-decoration: none;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
 }
