@@ -49,6 +49,16 @@
                     "...</td>  <td>" + splitString(reciever) + "...</td><td> Register Username </td> <td>"
                     + txn_size / 1000 +
                     " kB</td> </tr> ";
+            } else if (txn_type = "b") {
+                document.getElementById('transactions_rows').innerHTML = document.getElementById('transactions_rows').innerHTML +
+                    "<tr> <td> <a href='/src/transaction.html?hash=" + hash +
+                    "'>" + splitString(hash) + "...</a></td> <td>" + fee +
+                    " AIO</td> <td>" + amount / 10000
+                    + " AIO</td> <td>" +
+                    splitString(sender) +
+                    "...</td>  <td>" + splitString(reciever) + "...</td><td> Burn </td> <td>"
+                    + txn_size / 1000 +
+                    " kB</td> </tr> ";
             } else {
                 document.getElementById('transactions_rows').innerHTML = document.getElementById('transactions_rows').innerHTML +
                     "<tr> <td> <a href='/src/transaction.html?hash=" + hash +
@@ -62,7 +72,7 @@
             }
         }
         let params = new URLSearchParams(location.search);
-        let hash = params.get('h');
+        let hash = params.get('hash');
         if (hash != undefined) {
             // get this block
             let res;

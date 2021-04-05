@@ -17,7 +17,7 @@ function do_stuff() {
         let min = a.getMinutes();
         let sec = a.getSeconds();
         let time = `${date}/${month}/${year} ${hour}:${min}:${sec}`;
-        document.getElementById('blockList').innerHTML = document.getElementById('blockList').innerHTML + "<tr> <td><a href='/src/block.html?h=" + height + "'>" + height + "</a></td> <a href='/src/wallets/chain.html?key=" + sender + "'> <td>" + sender + "</td> </a> <td>" + txn_count + "</td> <td>" + tfc + " AIO</td> <td>" + recipitents + "</td> <td>" + time + "</td> </tr> ";
+        document.getElementById('blockList').innerHTML = document.getElementById('blockList').innerHTML + "<tr> <td><a href='/src/block.html?hash=" + hash + "'>" + height + "</a></td> <a href='/src/wallets/chain.html?key=" + sender + "'> <td>" + sender + "</td> </a> <td>" + txn_count + "</td> <td>" + tfc + " AIO</td> <td>" + recipitents + "</td> <td>" + time + "</td> </tr> ";
     }
     fetch("http://127.0.0.1:1234/lastten")
         .then(function (response) {
@@ -40,6 +40,9 @@ function do_stuff() {
 
 
                     } else if (txn['flag'] == "u" && block['block_type'] == "Recieve") {
+                        supply -= txn['amount'] / 10000;
+                        document.getElementById("supply").innerHTML = supply;
+                    } else if (txn['flag'] == "b" && block['block_type'] == "Recieve") {
                         supply -= txn['amount'] / 10000;
                         document.getElementById("supply").innerHTML = supply;
                     }
